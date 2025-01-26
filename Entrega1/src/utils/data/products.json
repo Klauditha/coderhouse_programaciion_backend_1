@@ -1,90 +1,46 @@
 [
   {
-    "title": "Product 3",
+    "id": 1,
+    "title": "Product 1 - Cart",
     "description": "Product 3",
     "code": "Product 3",
     "price": 300,
     "status": true,
     "stock": 300,
     "category": "Product 3",
-    "thumbnail": "/public/images/product3.jpg",
-    "id": 2
+    "thumbnail": "/public/images/product3.jpg"
   },
   {
-    "title": "Product 3",
+    "id": 2,
+    "title": "Product 2 - Cart",
     "description": "Product 3",
     "code": "Product 3",
     "price": 300,
     "status": true,
     "stock": 300,
     "category": "Product 3",
-    "thumbnail": "/public/images/product3.jpg",
-    "id": 4
+    "thumbnail": "/public/images/product3.jpg"
   },
   {
-    "id": {
-      "id": 3,
-      "title": "Product 3",
-      "description": "Product 3",
-      "code": "Product 3",
-      "price": 300,
-      "stock": 300,
-      "category": "Product 3",
-      "thumbnail": "/public/images/product3.jpg"
-    }
-  },
-  {
-    "id": {
-      "id": 4,
-      "title": "Product 3",
-      "description": "Product 3",
-      "code": "Product 3",
-      "price": 300,
-      "stock": 300,
-      "category": "Product 3",
-      "thumbnail": "/public/images/product3.jpg"
-    }
-  },
-  {
-    "id": {
-      "id": 5,
-      "title": "Product 3",
-      "description": "Product 3",
-      "code": "Product 3",
-      "price": 300,
-      "stock": 300,
-      "category": "Product 3",
-      "thumbnail": "/public/images/product3.jpg"
-    }
-  },
-  {
-    "id": 6,
-    "title": "Product 3",
+    "id": 3,
+    "title": "Product 1 - Cart",
     "description": "Product 3",
     "code": "Product 3",
     "price": 300,
-    "status": 300,
-    "stock": "Product 3",
-    "category": "/public/images/product3.jpg"
+    "status": true,
+    "stock": 300,
+    "category": "Product 3",
+    "thumbnail": "/public/images/product3.jpg"
   },
   {
-    "id": 7,
-    "title": "Product 3",
+    "id": 4,
+    "title": "Product 2 - Cart",
     "description": "Product 3",
     "code": "Product 3",
     "price": 300,
-    "status": 300,
-    "stock": "Product 3",
-    "category": "/public/images/product3.jpg"
-  },
-  {
-    "id": 8,
-    "title": "Product 3s MODIFICADO",
-    "description": "Product 3",
-    "code": "Product 3",
-    "price": 300,
-    "status": 300,
-    "stock": "Product 3",
-    "category": "/public/images/product3.jpg"
+    "status": true,
+    "stock": 300,
+    "category": "Product 3",
+    "thumbnail": "/public/images/product3.jpg"
   }
 ]
