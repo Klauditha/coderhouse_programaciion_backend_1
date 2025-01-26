@@ -84,4 +84,56 @@ router.post('/', (req, res) => {
   }
 });
 
+router.post('/:cid/product/:pid', (req, res) => {
+  try {
+    /* Datos del carrito y del producto requeridos */
+    let idCart = req.params.cid;
+    let idProduct = req.params.pid;
+    let quantity = req.body.quantity;
+
+    /* Leer los archivos */
+    let cartsData = JSON.parse(fs.readFileSync(rutaCarts, 'utf-8'));
+    let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
+
+    /* Buscar el carrito y el producto */
+    let cart = cartsData.find((c) => c.id === parseInt(idCart));
+    if (cart) {
+      /* Buscar el producto en el carrito */
+      let product = cart.products.find((p) => p.id === parseInt(idProduct));
+      /* Si el producto existe en el carrito, actualizar la cantidad */
+      if (product) {
+        product.quantity += quantity;
+      } else {
+        /* Si el producto no existe, buscarlo en el archivo products.json */
+        let product = productsData.find((p) => p.id === parseInt(idProduct));
+        /* Agregar el producto al carrito */
+        product = { id: product.id, quantity: quantity };
+        cart.products.push(product);
+      }
+      /* Actualizar el carrito */
+      cartsData.find((c) => c.id === parseInt(idCart)).products = cart.products;
+      /* Guardar los cambios en el archivo carts.json */
+      fs.writeFileSync(rutaCarts, JSON.stringify(cartsData, null, 2));
+      res.status(200).send({
+        status: 'success',
+        data: cart,
+        message: 'Producto agregado correctamente',
+      });
+    } else {
+      res.status(404).send({
+        status: 'error',
+        data: [],
+        message: 'Carrito no encontrado',
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      status: 'error',
+      data: [],
+      message:
+        'Error al agregar el producto al carrito. Detalles: ' + error.message,
+    });
+  }
+});
+
 module.exports = router;
