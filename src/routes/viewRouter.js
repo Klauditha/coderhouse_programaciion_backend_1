@@ -10,6 +10,10 @@ router.get('/', (req, res) => {
     res.render('home', { products });
 });
 
+router.get('/realTimeProducts', (req, res) => {
+    res.render('realTimeProducts');
+    /*     Server.emit('hola','hola desde el backend desde la ruta'); */
+});
 
 
 
