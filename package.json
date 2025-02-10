@@ -1,5 +1,5 @@
 {
-  "name": "entrega1",
+  "name": "entrega2backend",
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
@@ -10,10 +10,14 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "type": "module",
   "dependencies": {
     "express": "^4.21.2",
+    "express-handlebars": "^8.0.1",
+    "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "path": "^0.12.7",
+    "socket.io": "^4.8.1",
     "url": "^0.11.4"
   },
   "devDependencies": {

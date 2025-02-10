@@ -1,11 +1,14 @@
-const { Router } = require('express');
+import { Router } from 'express';
 const router = Router();
-const fs = require('fs');
-const path = require('path');
-const rutaCarts = path.join(__dirname, '../utils/data/carts.json');
-const rutaProducts = path.join(__dirname, '../utils/data/products.json');
-const Cart = require('../models/cart.js');
-const Product = require('../models/product.js');
+import fs from 'fs';
+import path from 'path';
+import __dirname from '../utils.js';
+const rutaCarts = path.join(__dirname, '/utils/data/carts.json');
+const rutaProducts = path.join(__dirname, '/utils/data/products.json');
+import Cart from '../models/cart.js';
+
+
+import Product from '../models/product.js';
 
 router.get('/:cid', (req, res) => {
   try {
@@ -33,7 +36,9 @@ router.post('/', (req, res) => {
     let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
     /**Array para almacenar los productos del carrito */
     let cartProducts = [];
+
     /**Array para almacenar los productos */
+
     let products = [];
     let cantidadPrductos = productsData.length;
     /**Recorrer y procesar productos */
@@ -130,4 +135,4 @@ router.post('/:cid/product/:pid', (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

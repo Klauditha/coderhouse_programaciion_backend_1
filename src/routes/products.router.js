@@ -1,10 +1,12 @@
-const { Router } = require('express');
+import { Router } from 'express';
+import fs from 'fs';
+import path from 'path';
+import Product from '../models/product.js';
+import __dirname from '../utils.js';
+
 const router = Router();
-const { uploader } = require('../utils/utils.js');
-const fs = require('fs');
-const path = require('path');
-const rutaProducts = path.join(__dirname, '../utils/data/products.json');
-const Product = require('../models/product.js');
+const rutaProducts = path.join(__dirname, '/utils/data/products.json');
+
 
 //GET /api/products
 router.get('/', (req, res) => {
@@ -103,9 +105,7 @@ router.put('/:pid', (req, res) => {
   try {
     const productId = parseInt(req.params.pid);
     const data = req.body;
-    let productsData = JSON.parse(
-      fs.readFileSync(rutaProducts, 'utf-8')
-    );
+    let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
     const productIndex = productsData.findIndex((p) => p.id === productId);
     if (productIndex === -1) {
       res
@@ -145,9 +145,7 @@ router.put('/:pid', (req, res) => {
 router.delete('/:pid', (req, res) => {
   try {
     const productId = parseInt(req.params.pid);
-    let productsData = JSON.parse(
-      fs.readFileSync(rutaProducts, 'utf-8')
-    );
+    let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
     const productIndex = productsData.findIndex((p) => p.id === productId);
     if (productIndex === -1) {
       res
@@ -171,4 +169,4 @@ router.delete('/:pid', (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

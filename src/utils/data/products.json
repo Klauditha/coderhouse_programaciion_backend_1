@@ -41,6 +41,6 @@
     "status": true,
     "stock": 300,
     "category": "Product 3",
-    "thumbnail": "/public/images/product3.jpg"
+    "thumbnail": null
   }
 ]
