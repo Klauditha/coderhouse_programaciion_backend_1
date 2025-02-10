@@ -10,14 +10,8 @@ const Product = require('../models/product.js');
 router.get('/:cid', (req, res) => {
   try {
     let cartsData = JSON.parse(fs.readFileSync(rutaCarts, 'utf-8'));
-    let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
-    console.log(cartsData);
     const cartData = cartsData.find((c) => c.id === parseInt(req.params.cid));
-    const cartProductsData = cartData.products.map((p) => {
-      const product = productsData.find((prod) => prod.id === p.id);
-      return { ...product, quantity: p.quantity };
-    });
-    const cart = new Cart(cartData.id, cartProductsData);
+    const cart = new Cart(cartData.id, []);
     res.status(200).send({
       status: 'success',
       data: cart,
