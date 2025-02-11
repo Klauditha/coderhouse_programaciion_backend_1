@@ -7,6 +7,7 @@ import __dirname from './utils.js';
 import path from 'path';
 import { Server } from 'socket.io';
 import fs from 'fs';
+import mongoose from 'mongoose';
 
 const PORT = 8080;
 
@@ -26,6 +27,8 @@ app.use('/', viewsRouter);
 const httpServer = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+mongoose.connect('mongodb+srv://admin:admin@cluster0.zqzqy.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0');
 
 const io = new Server(httpServer);
 
