@@ -2,8 +2,8 @@
 
 ## Entrega 2 - Desarrollo con socket.io y handlebars
 
-### Url despliegue de productos: [localhost:8080](http://localhost:8080)
-### Url metodo socket: [localhost:8080/socket](http://localhost:8080/realTimeproducts)
+-   Url despliegue de productos: [localhost:8080](http://localhost:8080)
+-   Url metodo socket: [localhost:8080/realTimeproducts](http://localhost:8080/realTimeproducts)
 
 
 ## Entrega 1 - Desarrollo de una API con Node.js y Express
