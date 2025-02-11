@@ -23,7 +23,7 @@
           <td>{{this.description}}</td>
           <td>{{this.code}}</td>
           <td>{{this.price}}</td>
-          <td>{{this.status}}</td>
+          <td>{{#if this.status}}Activo{{else}}Inactivo{{/if}}</td>
           <td>{{this.stock}}</td>
           <td>{{this.category}}</td>
           <td>{{#if this.thumbnail}} {{this.thumbnail}} {{else}}

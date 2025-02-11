@@ -24,29 +24,27 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', viewsRouter);
 
 const httpServer = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
 
 const io = new Server(httpServer);
 
 io.on('connection', async (socket) => {
   console.log('Nuevo cliente conectado');
-  let products = [];
   //Despliegue de productos - Llamada a la API para obtener los productos
   socket.emit('products', await fetchProducts());
 
   //Agregar producto
   socket.on('newProduct', async (product) => {
-    console.log(product);
-    addProduct(product);
+    const data = await addProduct(product);
+    io.emit('newProductResponse', data);
     io.emit('products', await fetchProducts());
-
-
   });
 
   //Eliminar producto
   socket.on('deleteProduct', async (productId) => {
-    deleteProduct(productId);
+    const data = await deleteProduct(productId);
+    io.emit('deleteProductResponse', data);
     io.emit('products', await fetchProducts());
   });
 
@@ -58,44 +56,54 @@ io.on('connection', async (socket) => {
 
 const fetchProducts = async () => {
   try {
-    const response = await fetch('http://localhost:8080/api/products');
+    const response = await fetch('http://localhost:' + PORT + '/api/products');
     const data = await response.json();
-    return data.data;
+    return data;
   } catch (error) {
-    console.log('Error al obtener los productos', error);
-    return [];
+    return {
+      status: 'error',
+      message: 'Error al obtener los productos',
+      data: [],
+    };
   }
 };
 
 const deleteProduct = async (productId) => {
   try {
     const response = await fetch(
-      `http://localhost:8080/api/products/${productId}`,
+      `http://localhost:${PORT}/api/products/${productId}`,
       {
         method: 'DELETE',
       }
     );
     const data = await response.json();
-    return data.data;
+    return data;
   } catch (error) {
-    console.log('Error al eliminar el producto', error);
-    return [];
+    return {
+      status: 'error',
+      message: 'Error al eliminar el producto',
+      data: [],
+    };
   }
 };
 
 const addProduct = async (product) => {
   try {
-    const response = await fetch('http://localhost:8080/api/products', {
+    const response = await fetch('http://localhost:' + PORT + '/api/products', {
       method: 'POST',
       body: JSON.stringify(product),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
     const data = await response.json();
-    console.log(data);
-    return data.data;
-
+    return data;
   } catch (error) {
-    console.log('Error al agregar el producto', error);
-    return [];
+    return {
+      status: 'error',
+      message: 'Error al agregar el producto',
+      data: [],
+    };
   }
 };
 

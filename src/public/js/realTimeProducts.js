@@ -1,32 +1,37 @@
 const socket = io();
 
 //Despliegue de productos
-socket.on('products', (products) => {
-  despliegueProductos(products);
+socket.on('products', (data) => {
+  despliegueProductos(data.data);
 });
 
 //Agregar producto
 const productForm = document.getElementById('productForm');
-
 productForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const formData = new FormData(productForm);
-  console.log(formData);
+  const status = formData.get('status');
+  const statusValue = status === 'on' ? true : false;
+  formData.set('status', statusValue);
   const product = Object.fromEntries(formData);
-  socket.emit('newProduct', product);
+  /*Captar la respuesta del servidor*/
+  socket.on('newProductResponse', (response) => {
+    if (response && response.status == 'success') {
+      Swal.fire({
+        title: response.message,
+        icon: 'success',
+      });
+    } else {
+      Swal.fire({
+        title: response.message,
+        icon: 'error',
+      });
+    }
+  });
   const productsContainer = document.getElementById('listProducts');
   productsContainer.innerHTML = '';
 });
 
-
-//Eliminar producto
-
-//Eliminar producto
-/*
-socket.on('deleteProduct', (productId) => {
-  console.log(productId);
-});
-*/
 const despliegueProductos = (products) => {
   const productsContainer = document.getElementById('listProducts');
   productsContainer.innerHTML = '';
@@ -38,7 +43,7 @@ const despliegueProductos = (products) => {
         <td>${product.description}</td>
         <td>${product.code}</td>
         <td>${product.price}</td>
-        <td>${product.status}</td>
+        <td>${product.status ? 'Activo' : 'Inactivo'}</td>
         <td>${product.stock}</td>
         <td>${product.category}</td>
         <td>${product.thumbnail ? product.thumbnail : 'No hay imagen'}</td>
@@ -55,6 +60,18 @@ const despliegueProductos = (products) => {
 
 const eliminarProducto = (productId) => {
   socket.emit('deleteProduct', productId);
-  const productsContainer = document.getElementById('listProducts');
-  productsContainer.innerHTML = '';
+  /*Capturar la respuesta del servidor*/
+  socket.on('deleteProductResponse', (response) => {
+    if (response && response.status == 'success') {
+      Swal.fire({
+        title: response.message,
+        icon: 'success',
+      });
+    } else {
+      Swal.fire({
+        title: response.message,
+        icon: 'error',
+      });
+    }
+  });
 };

@@ -58,6 +58,7 @@ router.get('/:pid', (req, res) => {
 router.post('/', (req, res) => {
   try {
     const data = req.body;
+    console.log(data);
     if (
       !data.title ||
       !data.description ||
@@ -73,12 +74,15 @@ router.post('/', (req, res) => {
       });
     } else {
       let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
+      console.log(data.status);
+      const status = data.status ? true : false;
       let newProduct = new Product(
         productsData.length + 1,
         data.title,
         data.description,
         data.code,
         data.price,
+        data.status,
         data.stock,
         data.category,
         data.thumbnail

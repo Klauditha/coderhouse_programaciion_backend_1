@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": 2,
+    "title": "Product 3",
+    "description": "Product 3",
+    "code": "Product 3",
+    "price": 300,
+    "status": true,
+    "stock": 300,
+    "category": "/public/images/product3.jpg",
+    "thumbnail": "/public/images/product3.jpg"
+  }
+]
