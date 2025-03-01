@@ -6,14 +6,13 @@ import __dirname from '../utils.js';
 const rutaCarts = path.join(__dirname, '/utils/data/carts.json');
 const rutaProducts = path.join(__dirname, '/utils/data/products.json');
 import Cart from '../models/cart.js';
-
+import { cartModel } from '../db/models/cart.model.js';
 
 import Product from '../models/product.js';
 
-router.get('/:cid', (req, res) => {
+router.get('/:cid', async (req, res) => {
   try {
-    let cartsData = JSON.parse(fs.readFileSync(rutaCarts, 'utf-8'));
-    const cartData = cartsData.find((c) => c.id === parseInt(req.params.cid));
+    const cartData = await cartModel.findById(req.params.cid);
     const cart = new Cart(cartData.id, []);
     res.status(200).send({
       status: 'success',
@@ -29,7 +28,7 @@ router.get('/:cid', (req, res) => {
   }
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const data = req.body;
     let cartsData = JSON.parse(fs.readFileSync(rutaCarts, 'utf-8'));
@@ -83,7 +82,7 @@ router.post('/', (req, res) => {
   }
 });
 
-router.post('/:cid/product/:pid', (req, res) => {
+router.post('/:cid/product/:pid', async (req, res) => {
   try {
     /* Datos del carrito y del producto requeridos */
     let idCart = req.params.cid;
@@ -91,8 +90,8 @@ router.post('/:cid/product/:pid', (req, res) => {
     let quantity = req.body.quantity;
 
     /* Leer los archivos */
-    let cartsData = JSON.parse(fs.readFileSync(rutaCarts, 'utf-8'));
-    let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
+    let cartsData = await cartModel.findById(idCart);
+    let productsData = await productModel.findById(idProduct);
 
     /* Buscar el carrito y el producto */
     let cart = cartsData.find((c) => c.id === parseInt(idCart));

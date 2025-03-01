@@ -3,32 +3,38 @@ import morgan from 'morgan';
 import handlebars from 'express-handlebars';
 import indexRouter from './routes/index.js';
 import viewsRouter from './routes/viewRouter.js';
+//import { getDirname } from './utils/dirname.js';
 import __dirname from './utils.js';
 import path from 'path';
 import { Server } from 'socket.io';
-import fs from 'fs';
-import mongoose from 'mongoose';
-
-const PORT = 8080;
+import { connectMongooseDB } from './db/connection.js';
 
 const app = express();
+const PORT = 8080;
+//const __dirname = getDirname(import.meta.url);
+
+connectMongooseDB();
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('tiny'));
 
-app.use('/api', indexRouter);
-
 app.engine('handlebars', handlebars.engine());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'handlebars');
+
 app.use(express.static(path.join(__dirname, 'public')));
+//app.use(express.static(__dirname + '/public'));
+
 app.use('/', viewsRouter);
 
+app.use('/api', indexRouter);
 const httpServer = app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
 
-mongoose.connect('mongodb+srv://admin:admin@cluster0.zqzqy.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0');
+//mongoose.connect('mongodb+srv://admin:admin@cluster0.zqzqy.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0');
 
 const io = new Server(httpServer);
 
@@ -61,6 +67,7 @@ const fetchProducts = async () => {
   try {
     const response = await fetch('http://localhost:' + PORT + '/api/products');
     const data = await response.json();
+    console.log(data);
     return data;
   } catch (error) {
     return {

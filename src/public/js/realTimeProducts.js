@@ -38,7 +38,7 @@ const despliegueProductos = (products) => {
   products.forEach((product) => {
     const productElement = document.createElement('tr');
     productElement.innerHTML = `
-        <td>${product.id}</td>
+        <td>${product._id}</td>
         <td>${product.title}</td>
         <td>${product.description}</td>
         <td>${product.code}</td>
@@ -48,9 +48,9 @@ const despliegueProductos = (products) => {
         <td>${product.category}</td>
         <td>${product.thumbnail ? product.thumbnail : 'No hay imagen'}</td>
         <td>
-          <button class='btn btn-danger' onclick='eliminarProducto(${
-            product.id
-          })'>Eliminar</button>
+          <button class='btn btn-danger' onclick='eliminarProducto("${
+            product._id.toString()
+          }")'>Eliminar</button>
         </td>
   
       `;
@@ -59,6 +59,7 @@ const despliegueProductos = (products) => {
 };
 
 const eliminarProducto = (productId) => {
+  console.log(productId);
   socket.emit('deleteProduct', productId);
   /*Capturar la respuesta del servidor*/
   socket.on('deleteProductResponse', (response) => {

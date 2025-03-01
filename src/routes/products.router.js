@@ -1,19 +1,19 @@
 import { Router } from 'express';
-import fs from 'fs';
 import path from 'path';
-import Product from '../models/product.js';
-import __dirname from '../utils.js';
+import { productModel } from '../db/models/product.model.js';
 
 const router = Router();
-const rutaProducts = path.join(__dirname, '/utils/data/products.json');
-
 
 //GET /api/products
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
-    const limit = parseInt(req.query.limit) || productsData.length;
-    const limitedProducts = productsData.slice(0, limit);
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const sort = req.query.sort || 'asc';
+    const query = req.query.query || {};
+
+    const products = await productModel.find(query);
+    const limitedProducts = products.slice(0, limit);
     res.status(200).send({
       status: 'success',
       data: limitedProducts,
@@ -29,11 +29,10 @@ router.get('/', (req, res) => {
 });
 
 //GET /api/products/:pid
-router.get('/:pid', (req, res) => {
+router.get('/:pid', async (req, res) => {
   try {
-    const productId = parseInt(req.params.pid);
-    let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
-    const product = productsData.find((p) => p.id === productId);
+    const productId = req.params.pid;
+    const product = await productModel.findById(productId);
     if (!product) {
       res
         .status(404)
@@ -55,7 +54,7 @@ router.get('/:pid', (req, res) => {
 });
 
 // POST /api/products
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const data = req.body;
     console.log(data);
@@ -73,25 +72,10 @@ router.post('/', (req, res) => {
         message: 'Faltan datos requeridos',
       });
     } else {
-      let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
-      console.log(data.status);
-      const status = data.status ? true : false;
-      let newProduct = new Product(
-        productsData.length + 1,
-        data.title,
-        data.description,
-        data.code,
-        data.price,
-        data.status,
-        data.stock,
-        data.category,
-        data.thumbnail
-      );
-      productsData.push(newProduct);
-      fs.writeFileSync(rutaProducts, JSON.stringify(productsData, null, 2));
+      await productModel.create(data);
       res.status(200).send({
         status: 'success',
-        data: newProduct,
+        data: data,
         message: 'Producto creado correctamente',
       });
     }
@@ -105,34 +89,20 @@ router.post('/', (req, res) => {
 });
 
 //PUT /api/products/:pid
-router.put('/:pid', (req, res) => {
+router.put('/:pid', async (req, res) => {
   try {
-    const productId = parseInt(req.params.pid);
+    const productId = req.params.pid;
     const data = req.body;
-    let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
-    const productIndex = productsData.findIndex((p) => p.id === productId);
-    if (productIndex === -1) {
+    const product = await productModel.findByIdAndUpdate(productId, data);
+    if (!product) {
       res
         .status(404)
         .send({ status: 'error', data: [], message: 'Producto no encontrado' });
     } else {
-      productsData[productIndex] = {
-        ...productsData[productIndex],
-        ...new Product(
-          productId,
-          data.title || productsData[productIndex].title,
-          data.description || productsData[productIndex].description,
-          data.code || productsData[productIndex].code,
-          data.price || productsData[productIndex].price,
-          data.stock || productsData[productIndex].stock,
-          data.category || productsData[productIndex].category,
-          data.thumbnail || productsData[productIndex].thumbnail
-        ),
-      };
-      fs.writeFileSync(rutaProducts, JSON.stringify(productsData, null, 2));
+      const productUpdated = await productModel.findById(productId);
       res.status(200).send({
         status: 'success',
-        data: productsData[productIndex],
+        data: productUpdated,
         message: 'Producto actualizado correctamente',
       });
     }
@@ -146,10 +116,10 @@ router.put('/:pid', (req, res) => {
 });
 
 //DELETE /api/products/:pid
-router.delete('/:pid', (req, res) => {
+router.delete('/:pid', async (req, res) => {
   try {
-    const productId = parseInt(req.params.pid);
-    let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
+    const productId = req.params.pid;
+    let productsData = await productModel.find();
     const productIndex = productsData.findIndex((p) => p.id === productId);
     if (productIndex === -1) {
       res
@@ -157,7 +127,7 @@ router.delete('/:pid', (req, res) => {
         .send({ status: 'error', data: [], message: 'Producto no encontrado' });
     } else {
       productsData.splice(productIndex, 1);
-      fs.writeFileSync(rutaProducts, JSON.stringify(productsData, null, 2));
+      await productModel.deleteOne({ _id: productId });
       res.status(200).send({
         status: 'success',
         data: [],
