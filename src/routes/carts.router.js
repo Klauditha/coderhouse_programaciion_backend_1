@@ -1,22 +1,16 @@
 import { Router } from 'express';
 const router = Router();
-import fs from 'fs';
-import path from 'path';
-import __dirname from '../utils.js';
-const rutaCarts = path.join(__dirname, '/utils/data/carts.json');
-const rutaProducts = path.join(__dirname, '/utils/data/products.json');
-import Cart from '../models/cart.js';
 import { cartModel } from '../db/models/cart.model.js';
+import { productModel } from '../db/models/product.model.js';
 
-import Product from '../models/product.js';
-
+//Obtener carrito por id
 router.get('/:cid', async (req, res) => {
+  console.log(req.params.cid);
   try {
     const cartData = await cartModel.findById(req.params.cid);
-    const cart = new Cart(cartData.id, []);
     res.status(200).send({
       status: 'success',
-      data: cart,
+      data: cartData,
       message: 'Carrito obtenido correctamente',
     });
   } catch (error) {
@@ -28,52 +22,18 @@ router.get('/:cid', async (req, res) => {
   }
 });
 
+//Crear carrito
 router.post('/', async (req, res) => {
+  console.log('Crear carrito');
   try {
-    const data = req.body;
-    let cartsData = JSON.parse(fs.readFileSync(rutaCarts, 'utf-8'));
-    let productsData = JSON.parse(fs.readFileSync(rutaProducts, 'utf-8'));
-    /**Array para almacenar los productos del carrito */
-    let cartProducts = [];
-
-    /**Array para almacenar los productos */
-
-    let products = [];
-    let cantidadPrductos = productsData.length;
-    /**Recorrer y procesar productos */
-    for (const product of data) {
-      let newProduct = new Product(
-        cantidadPrductos + products.length + 1,
-        product.title,
-        product.description,
-        product.code,
-        product.price,
-        product.status,
-        product.stock,
-        product.category,
-        product.thumbnail
-      );
-      products.push(newProduct);
-      cartProducts.push({
-        id: newProduct.id,
-        quantity: product.quantity,
-      });
-    }
-
-    //Agregar productos al archivo products.json
-    productsData.push(...products);
-    fs.writeFileSync(rutaProducts, JSON.stringify(productsData, null, 2));
-    /**Generar id del carrito */
-    const newCart = new Cart(cartsData.length + 1, cartProducts);
-    /**Agregar carrito al archivo carts.json */
-    cartsData.push(newCart);
-    fs.writeFileSync(rutaCarts, JSON.stringify(cartsData, null, 2));
+    let newCart = await cartModel.create({ products: [] });
     res.status(200).send({
       status: 'success',
       data: newCart,
       message: 'Carrito creado correctamente',
     });
   } catch (error) {
+    console.log(error);
     res.status(500).send({
       status: 'error',
       data: [],
@@ -82,36 +42,39 @@ router.post('/', async (req, res) => {
   }
 });
 
+//Agregar producto al carrito
 router.post('/:cid/product/:pid', async (req, res) => {
   try {
     /* Datos del carrito y del producto requeridos */
     let idCart = req.params.cid;
     let idProduct = req.params.pid;
     let quantity = req.body.quantity;
+    let cart = await cartModel.findById(idCart);
+    console.log('cart');
+    console.log(cart.products[0]._id);
+    let product = await productModel.findById(idProduct);
+    console.log('product');
+    console.log(product._id);
+    
+    
+   
+    if (cart && product) {
+      console.log('cart existe');
 
-    /* Leer los archivos */
-    let cartsData = await cartModel.findById(idCart);
-    let productsData = await productModel.findById(idProduct);
-
-    /* Buscar el carrito y el producto */
-    let cart = cartsData.find((c) => c.id === parseInt(idCart));
-    if (cart) {
-      /* Buscar el producto en el carrito */
-      let product = cart.products.find((p) => p.id === parseInt(idProduct));
-      /* Si el producto existe en el carrito, actualizar la cantidad */
-      if (product) {
-        product.quantity += quantity;
+      
+      if (productCart) {
+        console.log('producto existe en el carrito');
+        console.log(productCart);
+        productCart.quantity += quantity;
       } else {
-        /* Si el producto no existe, buscarlo en el archivo products.json */
-        let product = productsData.find((p) => p.id === parseInt(idProduct));
-        /* Agregar el producto al carrito */
-        product = { id: product.id, quantity: quantity };
+        console.log('producto no existe en el carrito');
+        product = { quantity: quantity };
         cart.products.push(product);
       }
       /* Actualizar el carrito */
-      cartsData.find((c) => c.id === parseInt(idCart)).products = cart.products;
+      cart.products = cart.products;
       /* Guardar los cambios en el archivo carts.json */
-      fs.writeFileSync(rutaCarts, JSON.stringify(cartsData, null, 2));
+      await cartModel.findByIdAndUpdate(idCart, { products: cart.products });
       res.status(200).send({
         status: 'success',
         data: cart,

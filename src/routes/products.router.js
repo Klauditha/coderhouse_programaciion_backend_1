@@ -1,7 +1,5 @@
 import { Router } from 'express';
-import path from 'path';
 import { productModel } from '../db/models/product.model.js';
-
 const router = Router();
 
 //GET /api/products
@@ -57,7 +55,6 @@ router.get('/:pid', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const data = req.body;
-    console.log(data);
     if (
       !data.title ||
       !data.description ||

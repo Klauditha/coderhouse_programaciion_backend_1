@@ -59,7 +59,6 @@ const despliegueProductos = (products) => {
 };
 
 const eliminarProducto = (productId) => {
-  console.log(productId);
   socket.emit('deleteProduct', productId);
   /*Capturar la respuesta del servidor*/
   socket.on('deleteProductResponse', (response) => {

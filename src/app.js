@@ -3,7 +3,6 @@ import morgan from 'morgan';
 import handlebars from 'express-handlebars';
 import indexRouter from './routes/index.js';
 import viewsRouter from './routes/viewRouter.js';
-//import { getDirname } from './utils/dirname.js';
 import __dirname from './utils.js';
 import path from 'path';
 import { Server } from 'socket.io';
@@ -11,7 +10,6 @@ import { connectMongooseDB } from './db/connection.js';
 
 const app = express();
 const PORT = 8080;
-//const __dirname = getDirname(import.meta.url);
 
 connectMongooseDB();
 
@@ -34,7 +32,6 @@ const httpServer = app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
 
-//mongoose.connect('mongodb+srv://admin:admin@cluster0.zqzqy.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0');
 
 const io = new Server(httpServer);
 
@@ -67,7 +64,6 @@ const fetchProducts = async () => {
   try {
     const response = await fetch('http://localhost:' + PORT + '/api/products');
     const data = await response.json();
-    console.log(data);
     return data;
   } catch (error) {
     return {
