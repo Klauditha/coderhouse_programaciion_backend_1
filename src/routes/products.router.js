@@ -5,10 +5,6 @@ const router = Router();
 //GET /api/products
 router.get('/', async (req, res) => {
   try {
-    console.log(req.query.limit);
-    console.log(req.query.page);
-    console.log(req.query.sort);
-    console.log(req.query.query);
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
     const sort = req.query.sort || 'asc';
