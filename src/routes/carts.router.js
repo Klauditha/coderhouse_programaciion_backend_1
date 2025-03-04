@@ -277,4 +277,23 @@ router.put('/:cid/products/:pid', async (req, res) => {
   }
 });
 
+//Vaciar carrito
+router.delete('/:cid', async (req, res) => {
+  try {
+    let idCart = req.params.cid;
+    await cartModel.findByIdAndUpdate(idCart, { $set: { products: [] } });
+    res.status(200).send({
+      status: 'success',
+      data: [],
+      message: 'Carrito vaciado correctamente',
+    });
+  } catch (error) {
+    res.status(500).send({
+      status: 'error',
+      data: [],
+      message: 'Error al vaciar el carrito. Detalles: ' + error.message,
+    });
+  }
+});
+
 export default router;
