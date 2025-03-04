@@ -107,27 +107,36 @@ router.delete('/:cid/products/:pid', async (req, res) => {
   try {
     let idCart = req.params.cid;
     let idProduct = req.params.pid;
+    console.log(idCart);
+    console.log(idProduct);
     let cart = await cartModel.findById(idCart);
     let product = await productModel.findById(idProduct);
+    let eliminado = false;
     if (cart && product) {
       cart.products.forEach(async (p) => {
         let idProductCart = p._id;
         if (idProductCart.equals(idProduct)) {
+          eliminado = true;
           await cartModel.findByIdAndUpdate(idCart, {
             $pull: { products: { _id: product._id } },
           });
-          let cartUpdate = await cartModel.findById(idCart);
-          console.log(cartUpdate);
-          res.status(200).send({
+        }
+      });
+      if (!eliminado) {
+        res.status(404).send({
+          status: 'error',
+          data: [],
+          message: 'Producto no encontrado en el carrito',
+        });
+      } else {
+        let cartUpdate = await cartModel.findById(idCart);
+        res.status(200).send({
           status: 'success',
           data: cartUpdate,
-            message: 'Producto eliminado correctamente',
-          });
-        }
-      });      
+          message: 'Producto eliminado correctamente',
+        });
+      }
     } else {
-      console.log(cart);
-      console.log(product);
       if (!cart) {
         res.status(404).send({
           status: 'error',
@@ -146,7 +155,8 @@ router.delete('/:cid/products/:pid', async (req, res) => {
     res.status(500).send({
       status: 'error',
       data: [],
-      message: 'Error al eliminar el producto del carrito. Detalles: ' + error.message,
+      message:
+        'Error al eliminar el producto del carrito. Detalles: ' + error.message,
     });
   }
 });
