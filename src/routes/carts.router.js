@@ -2,6 +2,7 @@ import { Router } from 'express';
 const router = Router();
 import { cartModel } from '../db/models/cart.model.js';
 import { productModel } from '../db/models/product.model.js';
+import { ObjectId } from 'mongodb';
 
 //Obtener carrito por id
 router.get('/:cid', async (req, res) => {
@@ -48,38 +49,40 @@ router.post('/:cid/product/:pid', async (req, res) => {
     /* Datos del carrito y del producto requeridos */
     let idCart = req.params.cid;
     let idProduct = req.params.pid;
-    let quantity = req.body.quantity;
+    let quantityReq = req.body.quantity;
     let cart = await cartModel.findById(idCart);
-    console.log('cart');
-    console.log(cart.products[0]._id);
     let product = await productModel.findById(idProduct);
-    console.log('product');
-    console.log(product._id);
-    
-    
-   
+    let agregado = false;
+    let cartUpdate = null;
     if (cart && product) {
-      console.log('cart existe');
-
-      
-      if (productCart) {
-        console.log('producto existe en el carrito');
-        console.log(productCart);
-        productCart.quantity += quantity;
-      } else {
-        console.log('producto no existe en el carrito');
-        product = { quantity: quantity };
-        cart.products.push(product);
-      }
-      /* Actualizar el carrito */
-      cart.products = cart.products;
-      /* Guardar los cambios en el archivo carts.json */
-      await cartModel.findByIdAndUpdate(idCart, { products: cart.products });
-      res.status(200).send({
-        status: 'success',
-        data: cart,
-        message: 'Producto agregado correctamente',
+      let idProduct = product._id;
+      cart.products.forEach(async (p) => {
+        let idProductCart = p._id;
+        if (idProductCart.equals(idProduct)) {
+          agregado = true;
+          p.quantity += quantityReq;
+          await cartModel.findByIdAndUpdate(idCart, {
+            $set: { products: cart.products },
+          });
+          cartUpdate = await cartModel.findById(idCart);
+          res.status(200).send({
+            status: 'success',
+            data: cartUpdate,
+            message: 'Producto agregado correctamente',
+          });
+        }
       });
+      if (!agregado) {
+        await cartModel.findByIdAndUpdate(idCart, {
+          $push: { products: { _id: product._id, quantity: quantityReq } },
+        });
+        let cart = await cartModel.findById(idCart);
+        res.status(200).send({
+          status: 'success',
+          data: cart,
+          message: 'Producto agregado correctamente',
+        });
+      }
     } else {
       res.status(404).send({
         status: 'error',
