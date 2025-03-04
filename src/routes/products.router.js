@@ -35,7 +35,14 @@ router.get('/', async (req, res) => {
 
     res.status(500).send({
       status: 'error',
-      data: [],
+      payload: [],
+      totalPages: 0,
+      prevPage: null,
+      nextPage: null,
+      page: 0,
+      hasPrevPage: false,
+      hasNextPage: false,
+      prevLink: null,
       message: 'Error al obtener los productos. Detalles: ' + error.message,
     });
   }
