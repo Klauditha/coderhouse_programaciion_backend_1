@@ -226,26 +226,39 @@ router.put('/:cid', async (req, res) => {
   }
 });
 
-//Actualizar la cantidad de un producto en específico en el carrito - En proceso
+//Actualizar la cantidad de un producto en específico en el carrito
 router.put('/:cid/products/:pid', async (req, res) => {
   try {
     let idCart = req.params.cid;
     let idProduct = req.params.pid;
     let quantityReq = req.body.quantity;
     let cart = await cartModel.findById(idCart);
+    let actualizado = false;
     if (cart) {
       cart.products.forEach(async (p) => {
         let idProductCart = p._id;
         if (idProductCart.equals(idProduct)) {
-          p.quantity = quantityReq;
+          actualizado = true;
+          p.quantity += quantityReq;
+          await cartModel.findByIdAndUpdate(idCart, {
+            $set: { products: cart.products },
+          });
         }
       });
-      let cartUpdate = await cartModel.findById(idCart);
-      res.status(200).send({
-        status: 'success',
-        data: cartUpdate,
-        message: 'Cantidad actualizada correctamente',
-      });
+      if (!actualizado) {
+        res.status(404).send({
+          status: 'error',
+          data: [],
+          message: 'Producto no encontrado en el carrito',
+        });
+      } else {
+        let cartUpdate = await cartModel.findById(idCart);
+        res.status(200).send({
+          status: 'success',
+          data: cartUpdate,
+          message: 'Cantidad actualizada correctamente',
+        });
+      }
     } else {
       res.status(404).send({
         status: 'error',
