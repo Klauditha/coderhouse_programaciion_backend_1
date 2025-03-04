@@ -5,19 +5,38 @@ const router = Router();
 //GET /api/products
 router.get('/', async (req, res) => {
   try {
+    console.log(req.query.limit);
+    console.log(req.query.page);
+    console.log(req.query.sort);
+    console.log(req.query.query);
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
     const sort = req.query.sort || 'asc';
     const query = req.query.query || {};
-
-    const products = await productModel.find(query);
-    const limitedProducts = products.slice(0, limit);
+    
+    const products = await productModel.paginate(query, {
+      limit: limit,
+      page: page,
+      sort: { _id: sort },
+    });
+    products.prevLink = products.hasPrevPage ? `/api/products?limit=${limit}&page=${products.prevPage}&sort=${sort}&query=${query}` : null;
+    products.nextLink = products.hasNextPage ? `/api/products?limit=${limit}&page=${products.nextPage}&sort=${sort}&query=${query}` : null;
+    products.message = 'Productos obtenidos correctamente';
     res.status(200).send({
-      status: 'success',
-      data: limitedProducts,
-      message: 'Productos obtenidos correctamente',
+      status: "success",
+      payload: products.docs,
+      totalPages: products.totalPages,
+      prevPage: products.prevPage,
+      nextPage: products.nextPage,
+      page: products.page,
+      hasPrevPage: products.hasPrevPage,
+      hasNextPage: products.hasNextPage,
+      prevLink: products.prevLink,
+      nextLink: products.nextLink,
+      message: products.message,
     });
   } catch (error) {
+
     res.status(500).send({
       status: 'error',
       data: [],
