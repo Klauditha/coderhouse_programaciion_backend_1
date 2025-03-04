@@ -85,6 +85,13 @@ router.post('/:cid/product/:pid', async (req, res) => {
           message: 'Producto agregado correctamente',
         });
       }
+      else{
+        res.status(200).send({
+          status: 'success',
+          data: cart,
+          message: 'Producto(s) ya existentes en el carrito',
+        });
+      }
     } else {
       res.status(404).send({
         status: 'error',
@@ -157,6 +164,102 @@ router.delete('/:cid/products/:pid', async (req, res) => {
       data: [],
       message:
         'Error al eliminar el producto del carrito. Detalles: ' + error.message,
+    });
+  }
+});
+
+//Actualizar carrito con arreglo de productos
+router.put('/:cid', async (req, res) => {
+  try {
+    let idCart = req.params.cid;
+    let products = req.body.products;
+    let cart = await cartModel.findById(idCart);
+    let nuevosProductos = false;
+    if (cart) {
+      products.forEach(async (p) => {
+        let product = await productModel.findById(p);
+        console.log(p);
+        //producto existe en la base de datos
+        if (product) {
+          //producto existe en el carrito
+          if (!cart.products.some((productCart) => productCart._id.equals(p))) {
+            //agregar el producto al carrito
+            console.log('producto agregado al carrito');
+            nuevosProductos = true;
+            await cartModel.findByIdAndUpdate(idCart, {
+              $push: { products: { _id: p, quantity: 0 } },
+            });
+          } 
+        }
+      });
+      if (nuevosProductos) {
+        await cartModel.findByIdAndUpdate(idCart, {
+          $set: { products: cart.products },
+        });
+        let cartUpdate = await cartModel.findById(idCart);
+        res.status(200).send({
+          status: 'success',
+          data: cartUpdate,
+          message: 'Carrito actualizado correctamente',
+        });
+      } else{
+
+        res.status(200).send({
+          status: 'success',
+          data: cart,
+          message: 'Producto(s) ya existentes en el carrito',
+        });
+      }
+    } else {
+      res.status(404).send({
+        status: 'error',
+        data: [],
+        message: 'Carrito no encontrado',
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      status: 'error',
+      data: [],
+      message: 'Error al actualizar el carrito. Detalles: ' + error.message,
+    });
+  }
+});
+
+//Actualizar la cantidad de un producto en específico en el carrito - En proceso
+router.put('/:cid/products/:pid', async (req, res) => {
+  try {
+    let idCart = req.params.cid;
+    let idProduct = req.params.pid;
+    let quantityReq = req.body.quantity;
+    let cart = await cartModel.findById(idCart);
+    if (cart) {
+      cart.products.forEach(async (p) => {
+        let idProductCart = p._id;
+        if (idProductCart.equals(idProduct)) {
+          p.quantity = quantityReq;
+        }
+      });
+      let cartUpdate = await cartModel.findById(idCart);
+      res.status(200).send({
+        status: 'success',
+        data: cartUpdate,
+        message: 'Cantidad actualizada correctamente',
+      });
+    } else {
+      res.status(404).send({
+        status: 'error',
+        data: [],
+        message: 'Carrito no encontrado',
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      status: 'error',
+      data: [],
+      message:
+        'Error al actualizar la cantidad del producto. Detalles: ' +
+        error.message,
     });
   }
 });
