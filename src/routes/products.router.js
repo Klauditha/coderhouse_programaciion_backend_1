@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
     const sort = req.query.sort || 'asc';
-    const query = req.query.query || {};
+    const query = req.query.query || '';
     
     const products = await productModel.paginate(query, {
       limit: limit,

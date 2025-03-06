@@ -1,9 +1,9 @@
 <h2>Lista de productos</h2>
 <div id='products' class='row'>
   <table class='table'>
-
     <thead class='table-dark'>
       <tr class='table-dark'>
+        <th></th>
         <th>ID</th>
         <th>Nombre</th>
         <th>Descripción</th>
@@ -15,22 +15,57 @@
         <th>Thumbnail</th>
       </tr>
     </thead>
-    <tbody>
-      {{#each products}}
+    <tbody id='listProducts'>
+      {{#if result.payload}}
+        {{#each result.payload}}
+          <tr>
+            <td><input
+                class='form-check-input'
+                type='checkbox'
+                value='{{this._id}}'
+                id='flexCheckDefault_{{this._id}}'
+              /></td>
+            <td>{{this._id}}</td>
+            <td>{{this.title}}</td>
+            <td>{{this.description}}</td>
+            <td>{{this.code}}</td>
+            <td>{{this.price}}</td>
+            <td>{{#if this.status}}Activo{{else}}Inactivo{{/if}}</td>
+            <td>{{this.stock}}</td>
+            <td>{{this.category}}</td>
+            <td>{{#if this.thumbnail}} {{this.thumbnail}} {{else}}
+                No hay imagen
+              {{/if}}</td>
+          </tr>
+        {{/each}}
+      {{else}}
         <tr>
-          <td>{{this._id}}</td>
-          <td>{{this.title}}</td>
-          <td>{{this.description}}</td>
-          <td>{{this.code}}</td>
-          <td>{{this.price}}</td>
-          <td>{{#if this.status}}Activo{{else}}Inactivo{{/if}}</td>
-          <td>{{this.stock}}</td>
-          <td>{{this.category}}</td>
-          <td>{{#if this.thumbnail}} {{this.thumbnail}} {{else}}
-              No hay imagen
-            {{/if}}</td>
+          <td colspan='10'>No hay productos</td>
         </tr>
-      {{/each}}
+      {{/if}}
     </tbody>
   </table>
+  <div class='d-flex justify-content-center'>
+    {{#if result.hasPrevPage}}
+      <a href={{result.prevLink}}><button class='btn btn-primary'></button></a>
+    {{/if}}
+    &nbsp;
+    <a href={{result.pageLink}}><button
+        class='btn btn-primary'
+      >{{result.page}}</button></a>
+    &nbsp;
+    {{#if result.hasNextPage}}
+      <a href={{result.nextLink}}><button
+          class='btn btn-primary'
+        >>></button></a>
+    {{/if}}
+  </div>
+  {{#if result.payload}}
+    <div class='d-flex justify-content-center mt-3'>
+      <button class='btn btn-primary' id='addCart'>Agregar a carrito</button>
+    </div>
+  {{/if}}
 </div>
+
+<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+<script src='/js/index.js'></script>

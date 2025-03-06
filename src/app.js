@@ -25,7 +25,8 @@ app.set('view engine', 'handlebars');
 app.use(express.static(path.join(__dirname, 'public')));
 //app.use(express.static(__dirname + '/public'));
 
-app.use('/', viewsRouter);
+
+
 
 app.use('/api', indexRouter);
 const httpServer = app.listen(PORT, () => {
@@ -53,7 +54,6 @@ io.on('connection', async (socket) => {
     io.emit('deleteProductResponse', data);
     io.emit('products', await fetchProducts());
   });
-
   //Despliegue de productos
   socket.on('disconnect', () => {
     console.log('Cliente desconectado');

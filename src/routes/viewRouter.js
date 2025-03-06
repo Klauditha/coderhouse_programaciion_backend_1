@@ -1,18 +1,33 @@
 import express from 'express';
-import fs from 'fs';
-import path from 'path';
-import __dirname from '../utils.js';
-
+import { productModel } from '../db/models/product.model.js';
 const router = express.Router();
+import axios from 'axios';
 
-router.get('/', (req, res) => {
-    const products = JSON.parse(fs.readFileSync(path.join(__dirname, '/utils/data/products.json'), 'utf-8'));
-    res.render('home', { products });
+router.get('/', async (req, res) => {
+    try {   
+        const limit = parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page) || 1;
+        const sort = req.query.sort || 'asc';
+        //const query = req.query.query || '';
+        console.log(limit, page, sort);
+        let result = await axios.get(`http://localhost:8080/api/products?limit=${limit}&page=${page}&sort=${sort}`);
+        result.data.prevLink = result.data.hasPrevPage ? `/?limit=${limit}&page=${result.data.prevPage}&sort=${sort}` : null;
+        result.data.nextLink = result.data.hasNextPage ? `/?limit=${limit}&page=${result.data.nextPage}&sort=${sort}` : null;
+        //console.log(result.data);
+        res.render('home', { result: result.data});
+    } catch (error) {
+        //console.log(error);
+        res.status(500).send({
+            status: 'error',
+            data: [],
+            message: 'Error al obtener los productos. Detalles: ' + error.message,
+        });
+    }
 });
 
-router.get('/realTimeProducts', (req, res) => {
-    res.render('realTimeProducts');
-    /*     Server.emit('hola','hola desde el backend desde la ruta'); */
+router.get('/realTimeProducts', async (req, res) => {
+    let products = await productModel.find();
+    res.render('realTimeProducts', { products });
 });
 
 

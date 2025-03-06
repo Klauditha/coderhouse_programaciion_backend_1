@@ -2,13 +2,13 @@ import { Router } from 'express';
 const router = Router();
 import { cartModel } from '../db/models/cart.model.js';
 import { productModel } from '../db/models/product.model.js';
-import { ObjectId } from 'mongodb';
 
 //Obtener carrito por id
 router.get('/:cid', async (req, res) => {
   console.log(req.params.cid);
   try {
-    const cartData = await cartModel.findById(req.params.cid);
+    const cartData = await cartModel.findById(req.params.cid).populate('products.product');
+    console.log(cartData.products);
     res.status(200).send({
       status: 'success',
       data: cartData,
@@ -46,66 +46,47 @@ router.post('/', async (req, res) => {
 //Agregar producto al carrito
 router.post('/:cid/product/:pid', async (req, res) => {
   try {
-    /* Datos del carrito y del producto requeridos */
-    let idCart = req.params.cid;
-    let idProduct = req.params.pid;
-    let quantityReq = req.body.quantity;
-    /* Busco el carrito y el producto */
-    let cart = await cartModel.findById(idCart);
-    let product = await productModel.findById(idProduct);
-    let agregado = false;
-    /* Si el carrito y el producto existen */
-    if (cart && product) {
-      let idProduct = product._id;
-      cart.products.forEach(async (p) => {
-        let idProductCart = p._id;
-        /* Si el producto existe en el carrito */
-        if (idProductCart.equals(idProduct)) {
-          agregado = true;
-          p.quantity += quantityReq;
-          await cartModel.findByIdAndUpdate(idCart, {
-            $set: { products: cart.products },
-          });
-          let cartUpdate = await cartModel.findById(idCart);
-          res.status(200).send({
-            status: 'success',
-            data: cartUpdate,
-            message: 'Producto agregado correctamente',
-          });
-        }
-      });
-      if (!agregado) {
-        await cartModel.findByIdAndUpdate(idCart, {
-          $push: { products: { _id: product._id, quantity: quantityReq } },
-        });
-        let cart = await cartModel.findById(idCart);
-        res.status(200).send({
-          status: 'success',
-          data: cart,
-          message: 'Producto agregado correctamente',
-        });
+    const { cid, pid } = req.params;
+    
+    // Verificamos que exista el carrito y el producto
+    const cart = await cartModel.findById(cid);
+    const product = await productModel.findById(pid);
+
+    if (!cart) {
+      return res.status(404).json({ error: "Carrito no encontrado" });
+    }
+    if (!product) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    // Buscamos si el producto ya existe en el carrito
+    const existingProductIndex = cart.products.findIndex(
+      (item) =>{
+        console.log(item);
+        console.log(item.product.toString());
+        console.log(pid);
+        return item.product.toString() === pid
       }
-      else{
-        res.status(200).send({
-          status: 'success',
-          data: cart,
-          message: 'Producto(s) ya existentes en el carrito',
-        });
-      }
+    );
+
+    if (existingProductIndex !== -1) {
+      // Si el producto existe, incrementamos la cantidad
+      cart.products[existingProductIndex].quantity += 1;
     } else {
-      res.status(404).send({
-        status: 'error',
-        data: [],
-        message: 'Carrito no encontrado',
+      // Si el producto no existe, lo agregamos
+      cart.products.push({
+        product: pid,  // Aquí solo necesitamos el ID ya que Mongoose manejará la referencia
+        quantity: 1
       });
     }
+
+    // Guardamos los cambios y populamos los productos para la respuesta
+    await cart.save();
+    const populatedCart = await cartModel.findById(cid).populate('products.product');
+
+    res.json(populatedCart);
   } catch (error) {
-    res.status(500).send({
-      status: 'error',
-      data: [],
-      message:
-        'Error al agregar el producto al carrito. Detalles: ' + error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -121,7 +102,7 @@ router.delete('/:cid/products/:pid', async (req, res) => {
     let eliminado = false;
     if (cart && product) {
       cart.products.forEach(async (p) => {
-        let idProductCart = p._id;
+        let idProductCart = p.product._id;
         if (idProductCart.equals(idProduct)) {
           eliminado = true;
           await cartModel.findByIdAndUpdate(idCart, {
@@ -178,16 +159,19 @@ router.put('/:cid', async (req, res) => {
     if (cart) {
       products.forEach(async (p) => {
         let product = await productModel.findById(p);
+        console.log(cart.products[0]);
         console.log(p);
         //producto existe en la base de datos
         if (product) {
           //producto existe en el carrito
-          if (!cart.products.some((productCart) => productCart._id.equals(p))) {
+          //console.log("producto en el carrito: ",cart.products[0]._id);
+          console.log("producto en la base de datos: ",product._id);
+          if (!cart.products.some((productCart) => productCart._id.equals(product._id))) {
             //agregar el producto al carrito
             console.log('producto agregado al carrito');
             nuevosProductos = true;
             await cartModel.findByIdAndUpdate(idCart, {
-              $push: { products: { _id: p, quantity: 0 } },
+              $push: { products: { _id: product._id, quantity: 0 } },
             });
           } 
         }
