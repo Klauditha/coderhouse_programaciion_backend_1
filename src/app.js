@@ -7,6 +7,7 @@ import __dirname from './utils.js';
 import path from 'path';
 import { Server } from 'socket.io';
 import { connectMongooseDB } from './db/connection.js';
+import cors from 'cors';
 
 const app = express();
 const PORT = 8080;
@@ -14,6 +15,7 @@ const PORT = 8080;
 connectMongooseDB();
 
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('tiny'));
@@ -33,6 +35,7 @@ const httpServer = app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
 
+app.use('/', viewsRouter);
 
 const io = new Server(httpServer);
 

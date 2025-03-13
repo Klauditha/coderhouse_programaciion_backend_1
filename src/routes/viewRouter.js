@@ -13,10 +13,10 @@ router.get('/', async (req, res) => {
         let result = await axios.get(`http://localhost:8080/api/products?limit=${limit}&page=${page}&sort=${sort}`);
         result.data.prevLink = result.data.hasPrevPage ? `/?limit=${limit}&page=${result.data.prevPage}&sort=${sort}` : null;
         result.data.nextLink = result.data.hasNextPage ? `/?limit=${limit}&page=${result.data.nextPage}&sort=${sort}` : null;
-        //console.log(result.data);
+        console.log(result.data);
         res.render('home', { result: result.data});
     } catch (error) {
-        //console.log(error);
+        console.log(error);
         res.status(500).send({
             status: 'error',
             data: [],
